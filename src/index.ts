@@ -17,6 +17,7 @@ import { checkToken } from './middleware/authMiddleware'
 import createAdminUser from './seeder/admin'
 import contestRoutes from './routes/contestRoutes'
 import handleMongoErrors from './middleware/mongooseError'
+import mongoose from 'mongoose'
 
 dotenv.config()
 
@@ -34,8 +35,6 @@ connectDB().catch((error) => {
     console.error('Error connecting to MongoDB:', error.message)
     process.exit(1)
 })
-
-void createAdminUser()
 
 app.use(
     cors({
@@ -68,6 +67,13 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction): void => {
     })
 })
 
-app.listen(port, () => {
-    console.log(`⚡️[server]: Server is running at http://localhost:${port}`)
+const db = mongoose.connection
+
+db.once('open', () => {
+    void createAdminUser()
+    app.listen(port, () => {
+        console.log(
+            `⚡️[server]: Server is running at http://localhost:${port}`
+        )
+    })
 })

@@ -13,6 +13,7 @@ interface EnvVariables {
     ADMIN_USN: string
     ALLOW_QUESTION_UPDATE: boolean
     ALLOW_USER_REGISTRATION: boolean
+    ADMIN_PHONE: string
 }
 
 declare let process: {
@@ -27,6 +28,7 @@ declare let process: {
         ADMIN_USN: string
         ALLOW_QUESTION_UPDATE: string
         ALLOW_USER_REGISTRATION: string
+        ADMIN_PHONE: string
     }
 }
 const envVariables: EnvVariables = {
@@ -56,6 +58,7 @@ const envVariables: EnvVariables = {
     ADMIN_USN:
         process.env.ADMIN_USN !== '' ? process.env.ADMIN_USN : '01JST00CS000',
     ALLOW_QUESTION_UPDATE: process.env.ALLOW_QUESTION_UPDATE === 'true',
-    ALLOW_USER_REGISTRATION: process.env.ALLOW_USER_REGISTRATION === 'true'
+    ALLOW_USER_REGISTRATION: process.env.ALLOW_USER_REGISTRATION === 'true',
+    ADMIN_PHONE: process.env.ADMIN_PHONE
 }
 export default envVariables

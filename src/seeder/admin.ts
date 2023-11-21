@@ -9,6 +9,7 @@ const createAdminUser = async (): Promise<void> => {
         const adminEmail = envVariables.ADMIN_EMAIL
         const adminFullName = envVariables.ADMIN_FULLNAME
         const adminUSN = envVariables.ADMIN_USN
+        const adminPhone = envVariables.ADMIN_PHONE
 
         const existingAdmin = await User.findOne({ username: adminUsername })
         if (existingAdmin != null) {
@@ -23,7 +24,8 @@ const createAdminUser = async (): Promise<void> => {
             email: adminEmail,
             fullName: adminFullName,
             usn: adminUSN,
-            isAdmin: true
+            isAdmin: true,
+            phone: adminPhone
         })
 
         await adminUser.save()

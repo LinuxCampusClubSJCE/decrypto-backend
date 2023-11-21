@@ -11,6 +11,7 @@ const connectDB = async (): Promise<void> => {
         if (error instanceof MongoError) {
             console.error('Error connecting to MongoDB:', error.message)
         }
+        console.log(error)
         process.exit(1)
     }
 }
