@@ -3,6 +3,7 @@ import Question, { type IQuestion } from '../models/Question'
 import Contest from '../models/Contest'
 import moment from 'moment-timezone'
 import envVariables from '../config/config'
+import { Md5 } from 'ts-md5'
 
 // Controller to add a new question
 export const checkAns = async (
@@ -82,13 +83,20 @@ export const getMyQuestion = async (
         }
         const questionId = contest?.questionOrder[questionNum + 1]
         const question =
-            await Question.findById(questionId).select('image hint')
-        res.status(201).json({
-            success: true,
-            started: true,
-            completed: false,
-            question
-        })
+            await Question.findById(questionId).select('image hint answer')
+        if (question != null) {
+            res.status(201).json({
+                success: true,
+                started: true,
+                completed: false,
+                question: { ...question, answer: Md5.hashStr(question.answer) }
+            })
+        } else {
+            res.status(400).json({
+                success: false,
+                message: 'Question not found'
+            })
+        }
     } catch (error) {
         next(error)
     }

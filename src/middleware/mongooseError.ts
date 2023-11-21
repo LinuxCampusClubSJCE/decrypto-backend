@@ -21,7 +21,10 @@ const handleMongoErrors = (
         res.status(400).json({ success: false, message: 'Invalid ID' })
     } else {
         // Other Mongoose errors
-        res.status(500).json({ message: 'Error with the request' })
+        res.status(500).json({
+            success: false,
+            message: 'Error with the request'
+        })
     }
 }
 

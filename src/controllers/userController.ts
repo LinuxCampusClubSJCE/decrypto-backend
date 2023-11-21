@@ -1,6 +1,6 @@
 import { type NextFunction, type Request, type Response } from 'express'
 import User, { type IUser } from '../models/User' // Assuming IUser is the User model interface
-
+import bcrypt from 'bcrypt'
 export const getAllUsers = async (
     req: Request,
     res: Response,
@@ -21,6 +21,15 @@ export const getUserById = async (
 ): Promise<void> => {
     try {
         const userId = req.params.id // Assuming user ID is passed as a parameter
+        console.log(userId, req.user?._id)
+        if (
+            req.user !== undefined &&
+            !req.user.isAdmin &&
+            req.user._id.toString() !== userId
+        ) {
+            res.status(400).json({ success: false, message: 'Not authorized' })
+            return
+        }
         const user: IUser | null = await User.findById(userId) // Assuming User is the Mongoose model
         if (user != null) {
             res.json({ success: true, user })
@@ -39,8 +48,30 @@ export const updateUser = async (
 ): Promise<void> => {
     const userId = req.params.id // Assuming user ID is passed as a parameter
     const updatedUserData = req.body // Data to update, received in request body
-
     try {
+        if (
+            req.user !== undefined &&
+            !req.user.isAdmin &&
+            req.user._id.toString() !== userId
+        ) {
+            res.status(400).json({
+                success: false,
+                message: 'Not authorized'
+            })
+            return
+        }
+        if (req.user !== undefined && !req.user?.isAdmin) {
+            delete updatedUserData.isTeam
+            delete updatedUserData.isAdmin
+            delete updatedUserData.username
+        }
+        if (updatedUserData.password !== undefined) {
+            const hashedPassword = await bcrypt.hash(
+                updatedUserData.password,
+                10
+            )
+            updatedUserData.password = hashedPassword
+        }
         const updatedUser = await User.findByIdAndUpdate(
             userId,
             updatedUserData,
