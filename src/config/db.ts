@@ -4,6 +4,7 @@ import envVariables from './config.js'
 
 const connectDB = async (): Promise<void> => {
     try {
+        console.log('Trying to connect to Mongodb')
         await mongoose.connect(envVariables.MONGODB_URI)
         console.log('MongoDB connected')
     } catch (error: unknown) {
