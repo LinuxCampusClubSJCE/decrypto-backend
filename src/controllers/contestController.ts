@@ -88,13 +88,11 @@ export const updateContest = async (
 ): Promise<void> => {
     try {
         const { id } = req.params
-        const { name, questionOrder, startTime, endTime } = req.body
 
-        const updatedContest = await Contest.findByIdAndUpdate(
-            id,
-            { name, questionOrder, startTime, endTime },
-            { new: true, upsert: true }
-        )
+        const updatedContest = await Contest.findByIdAndUpdate(id, req.body, {
+            new: true,
+            upsert: true
+        })
 
         if (updatedContest == null) {
             res.status(404).json({ error: 'Contest not found' })
