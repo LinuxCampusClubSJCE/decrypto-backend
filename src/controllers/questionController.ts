@@ -4,7 +4,10 @@ import Contest from '../models/Contest'
 import moment from 'moment-timezone'
 import envVariables from '../config/config'
 import { Md5 } from 'ts-md5'
-
+const modifyString = (inputString: string): string => {
+    const modifiedString = inputString.replace(/\s+/g, '').toLowerCase()
+    return modifiedString
+}
 // Controller to add a new question
 export const checkAns = async (
     req: Request,
@@ -12,29 +15,33 @@ export const checkAns = async (
     next: NextFunction
 ): Promise<void> => {
     try {
-        const { answer } = req.body
+        const { answer, rate } = req.body
         if (req.user == null || req.user.isAdmin || req.user.isTeam) return
         const questionNum = req.user.solvedQuestions
-        // TODO: start time and end time
         const contest = await Contest.findOne({})
         const questionId = contest?.questionOrder[questionNum]
 
         const question = await Question.findById(questionId)
 
-        const modifyString = (inputString: string): string => {
-            const modifiedString = inputString.replace(/\s+/g, '').toLowerCase()
-            return modifiedString
-        }
-        if (modifyString(answer) === question?.answer) {
+        if (
+            question !== null &&
+            modifyString(answer) === modifyString(question?.answer ?? ' ')
+        ) {
             req.user.solvedQuestions++
             req.user.lastSolvedTime = moment.tz('Asia/Kolkata').toDate()
             await req.user?.save()
             res.status(201).json({
                 success: true,
-                message: 'Question added successfully'
+                message: 'Your Answer is correct'
             })
+            question.rateCount++
+            question.rating = (rate + question.rating) / question.rateCount
+            await question.save()
         } else {
-            res.status(201).json({ success: false, message: 'Incorrect' })
+            res.status(201).json({
+                success: false,
+                message: 'Incorrect Answer'
+            })
         }
     } catch (error) {
         next(error)
@@ -81,15 +88,23 @@ export const getMyQuestion = async (
             })
             return
         }
-        const questionId = contest?.questionOrder[questionNum + 1]
-        const question =
-            await Question.findById(questionId).select('image hint answer')
+        const questionId = contest?.questionOrder[questionNum]
+        const question = await Question.findById(questionId).select(
+            'image hint answer showedHint rating rateCount'
+        )
         if (question != null) {
             res.status(201).json({
                 success: true,
                 started: true,
                 completed: false,
-                question: { ...question, answer: Md5.hashStr(question.answer) }
+                question: {
+                    no: questionNum + 1,
+                    image: question.image,
+                    showedHint: question.showedHint,
+                    rating: question.rating,
+                    rateCount: question.rateCount,
+                    answer: Md5.hashStr(modifyString(question.answer))
+                }
             })
         } else {
             res.status(400).json({

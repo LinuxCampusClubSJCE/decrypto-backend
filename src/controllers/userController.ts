@@ -46,8 +46,8 @@ export const updateUser = async (
     res: Response,
     next: NextFunction
 ): Promise<void> => {
-    const userId = req.params.id // Assuming user ID is passed as a parameter
-    const updatedUserData = req.body // Data to update, received in request body
+    const userId = req.params.id
+    const updatedUserData = req.body
     try {
         if (
             req.user !== undefined &&
@@ -81,7 +81,7 @@ export const updateUser = async (
             res.status(404).json({ success: true, message: 'User not found' })
             return
         }
-        res.json(updatedUser)
+        res.json({ success: true, user: updatedUser })
     } catch (error) {
         next(error)
     }
@@ -92,8 +92,7 @@ export const deleteUser = async (
     res: Response,
     next: NextFunction
 ): Promise<void> => {
-    const userId = req.params.id // Assuming user ID is passed as a parameter
-
+    const userId = req.params.id
     try {
         const deletedUser = await User.findByIdAndDelete(userId)
         if (deletedUser == null) {
@@ -116,7 +115,7 @@ export const getLeaderboard = async (
             { isAdmin: false, isTeam: false },
             'username solvedQuestions'
         )
-            .sort({ solvedQuestions: -1, lastSolvedTime: 1 }) // Sort by solvedQuestions descending, lastSolvedTime ascending
+            .sort({ solvedQuestions: -1, lastSolvedTime: 1 })
             .exec()
         res.json({ success: true, leaderboard })
     } catch (error) {
