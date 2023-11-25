@@ -21,7 +21,6 @@ export const getUserById = async (
 ): Promise<void> => {
     try {
         const userId = req.params.id // Assuming user ID is passed as a parameter
-        console.log(userId, req.user?._id)
         if (
             req.user !== undefined &&
             !req.user.isAdmin &&
@@ -77,8 +76,8 @@ export const updateUser = async (
             updatedUserData,
             { new: true }
         )
-        if (updatedUser != null) {
-            res.status(404).json({ success: true, message: 'User not found' })
+        if (updatedUser == null) {
+            res.status(404).json({ success: false, message: 'User not found' })
             return
         }
         res.json({ success: true, user: updatedUser })

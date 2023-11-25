@@ -5,6 +5,9 @@ interface IContest extends Document {
     questionOrder: mongoose.Types.ObjectId[]
     startTime: Date
     endTime: Date
+    allowRegistration: boolean
+    allowQuestionModify: boolean
+    forceState: 'start' | 'stop' | ''
 }
 
 const ContestSchema: Schema = new Schema({
@@ -18,7 +21,10 @@ const ContestSchema: Schema = new Schema({
     },
     questionOrder: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Question' }],
     startTime: { type: Date, required: [true, 'Start time is required'] },
-    endTime: { type: Date, required: [true, 'End time is required'] }
+    endTime: { type: Date, required: [true, 'End time is required'] },
+    allowRegistration: { type: Boolean },
+    allowQuestionModify: { type: Boolean },
+    forceState: { type: String, enum: ['start', 'stop', ''], default: '' }
 })
 
 const Contest = mongoose.model<IContest>('Contest', ContestSchema)

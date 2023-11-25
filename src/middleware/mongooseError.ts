@@ -19,6 +19,14 @@ const handleMongoErrors = (
     } else if (err instanceof mongoose.Error.CastError) {
         // Mongoose cast error
         res.status(400).json({ success: false, message: 'Invalid ID' })
+    } else if (
+        (err as MongoError).code === 11000 ||
+        (err as MongoError).code === 11001
+    ) {
+        res.status(400).json({
+            success: false,
+            message: 'Duplicated Value'
+        })
     } else {
         // Other Mongoose errors
         res.status(500).json({

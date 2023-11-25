@@ -7,7 +7,8 @@ import {
     deleteQuestion,
     checkAns,
     getMyQuestion,
-    checkModifiy
+    checkModifiy,
+    checkAnswerExist
 } from '../controllers/questionController'
 import { checkTeam } from '../middleware/authMiddleware'
 
@@ -22,5 +23,6 @@ router.put('/:id', checkTeam, updateQuestion) // Route to update a question by I
 router.delete('/:id', checkTeam, deleteQuestion) // Route to delete a question by ID
 router.get('/:id', checkTeam, getQuestionById) // Route to get a question by ID
 router.get('/', checkTeam, getAllQuestions) // Route to get all questions
+router.get('/exist/:answer', checkTeam, checkAnswerExist) // Route to get all questions
 
 export default router

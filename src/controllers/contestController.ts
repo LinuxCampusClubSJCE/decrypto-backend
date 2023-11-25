@@ -15,9 +15,19 @@ export const getDetails = async (
             res.json({ success: false, message: 'Contest not found' })
             return
         }
+        if (contest.forceState === 'stop') {
+            res.json({ success: false, message: 'Contest is over' })
+            return
+        }
+        if (contest.forceState === 'start') {
+            res.json({
+                success: true,
+                message: 'Contest started'
+            })
+            return
+        }
         const startTime = moment(contest.startTime).tz('Asia/Kolkata')
         const endTime = moment(contest.endTime).tz('Asia/Kolkata')
-        // Check if current time is within the contest duration
         if (!currentTime.isBetween(startTime, endTime, 'minute', '[]')) {
             res.json({
                 success: true,
@@ -67,11 +77,27 @@ export const createContest = async (
     next: NextFunction
 ): Promise<void> => {
     try {
-        const { name, questionOrder, startTime, endTime } = req.body
+        const {
+            name,
+            questionOrder,
+            startTime,
+            endTime,
+            allowRegistration,
+            allowQuestionModify,
+            allowQuestionUpload
+        } = req.body
 
         const savedContest = await Contest.findOneAndUpdate(
             {},
-            { name, questionOrder, startTime, endTime },
+            {
+                name,
+                questionOrder,
+                startTime,
+                endTime,
+                allowRegistration,
+                allowQuestionModify,
+                allowQuestionUpload
+            },
             { new: true, upsert: true }
         )
         res.status(201).json({ success: true, contest: savedContest })

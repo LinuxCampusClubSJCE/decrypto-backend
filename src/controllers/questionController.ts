@@ -2,7 +2,6 @@ import { type NextFunction, type Request, type Response } from 'express'
 import Question, { type IQuestion } from '../models/Question'
 import Contest from '../models/Contest'
 import moment from 'moment-timezone'
-import envVariables from '../config/config'
 import { Md5 } from 'ts-md5'
 const modifyString = (inputString: string): string => {
     const modifiedString = inputString.replace(/\s+/g, '').toLowerCase()
@@ -15,7 +14,7 @@ export const checkAns = async (
     next: NextFunction
 ): Promise<void> => {
     try {
-        const { answer, rate } = req.body
+        const { answer, rate, ansCount } = req.body
         if (req.user == null || req.user.isAdmin || req.user.isTeam) return
         const questionNum = req.user.solvedQuestions
         const contest = await Contest.findOne({})
@@ -36,6 +35,8 @@ export const checkAns = async (
             })
             question.rateCount++
             question.rating = (rate + question.rating) / question.rateCount
+            question.ansCount =
+                (Number(ansCount) + question.ansCount) / question.rateCount
             await question.save()
         } else {
             res.status(201).json({
@@ -60,14 +61,18 @@ export const getMyQuestion = async (
         const questionNum = req.user.solvedQuestions
         // Convert contest start and end times to moment objects in IST
         const contest = await Contest.findOne({})
-        if (contest == null || contest.questionOrder.length === 0) {
+        if (contest == null) {
             res.json({ success: false, message: 'Contest not found' })
             return
         }
         const startTime = moment(contest.startTime).tz('Asia/Kolkata')
         const endTime = moment(contest.endTime).tz('Asia/Kolkata')
         // Check if current time is within the contest duration
-        if (!currentTime.isBetween(startTime, endTime, 'minute', '[]')) {
+        if (
+            contest.forceState !== 'start' &&
+            (contest.forceState === 'stop' ||
+                !currentTime.isBetween(startTime, endTime, 'minute', '[]'))
+        ) {
             res.json({
                 success: false,
                 message: 'Contest Not started',
@@ -90,7 +95,7 @@ export const getMyQuestion = async (
         }
         const questionId = contest?.questionOrder[questionNum]
         const question = await Question.findById(questionId).select(
-            'image hint answer showedHint rating rateCount'
+            'image hint answer showedHint rating rateCount ansCount'
         )
         if (question != null) {
             res.status(201).json({
@@ -103,7 +108,8 @@ export const getMyQuestion = async (
                     showedHint: question.showedHint,
                     rating: question.rating,
                     rateCount: question.rateCount,
-                    answer: Md5.hashStr(modifyString(question.answer))
+                    answer: Md5.hashStr(modifyString(question.answer)),
+                    ansCount: question.ansCount
                 }
             })
         } else {
@@ -124,7 +130,10 @@ export const getAllQuestions = async (
 ): Promise<void> => {
     try {
         if (req.user != null && req.user?.isAdmin) {
-            const questions = await Question.find()
+            const questions = await Question.find().populate(
+                'creator',
+                'fullName username'
+            )
             res.json({ success: true, questions })
         } else {
             const questions = await Question.find({ creator: req.user?._id })
@@ -147,6 +156,7 @@ export const addQuestion = async (
         const newQuestion: IQuestion = new Question({
             image,
             answer,
+            modifiedAnswer: modifyString(answer),
             hint,
             difficulty,
             creator: req.user._id
@@ -189,7 +199,12 @@ export const updateQuestion = async (
     next: NextFunction
 ): Promise<void> => {
     try {
-        if (!envVariables.ALLOW_QUESTION_UPDATE) {
+        const contest = await Contest.findOne({})
+        let allowed = true
+        if (contest !== null && !contest.allowQuestionModify) {
+            allowed = false
+        }
+        if (!allowed && req.user !== undefined && !req.user.isAdmin) {
             res.json({
                 success: false,
                 message: 'Contest Started. Cannot Update. Ask Admin'
@@ -213,14 +228,39 @@ export const deleteQuestion = async (
     next: NextFunction
 ): Promise<void> => {
     try {
-        if (!envVariables.ALLOW_QUESTION_UPDATE) {
+        const contest = await Contest.findOne({})
+        let allowed = true
+        if (contest !== null && !contest.allowQuestionModify) {
+            allowed = false
+        }
+        if (!allowed && req.user !== undefined && !req.user.isAdmin) {
             res.json({
                 success: false,
                 message: 'Contest Started. Cannot Delete. Ask Admin'
             })
             return
         }
-        await Question.findByIdAndDelete(req.params.id)
+        if (req.user !== undefined && req.user.isAdmin) {
+            await Question.findByIdAndDelete(req.params.id)
+        } else {
+            const question = await Question.findOneAndDelete({
+                _id: req.params.id,
+                creator: req.user?._id
+            })
+            if (question === null) {
+                res.status(404).json({
+                    success: false,
+                    message: 'Question not found'
+                })
+                return
+            }
+        }
+        if (contest !== null) {
+            contest.questionOrder = contest.questionOrder.filter(
+                (q) => q._id.toString() !== req.params.id
+            )
+            await contest.save()
+        }
         res.status(200).json({
             success: true,
             message: 'Question deleted successfully'
@@ -233,5 +273,19 @@ export const checkModifiy = async (
     req: Request,
     res: Response
 ): Promise<void> => {
-    res.json({ success: true, allowed: envVariables.ALLOW_QUESTION_UPDATE })
+    const contest = await Contest.findOne({})
+    let allowed = true
+    if (contest !== null && !contest.allowQuestionModify) {
+        allowed = false
+    }
+    res.json({ success: true, allowed })
+}
+
+export const checkAnswerExist = async (
+    req: Request,
+    res: Response
+): Promise<void> => {
+    const { answer } = req.params
+    const question = await Question.findOne({ modifiedAnswer: answer })
+    res.json({ success: true, exist: question !== null })
 }

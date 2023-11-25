@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import User, { type IUser } from '../models/User'
 import envVariables from '../config/config'
+import Contest from '../models/Contest'
 
 // Controller for user registration
 export const registerUser = async (
@@ -11,9 +12,8 @@ export const registerUser = async (
     next: NextFunction
 ): Promise<void> => {
     try {
-        console.log(envVariables.ALLOW_USER_REGISTRATION)
-        console.log(typeof envVariables.ALLOW_USER_REGISTRATION)
-        if (!envVariables.ALLOW_USER_REGISTRATION) {
+        const contest = await Contest.findOne({})
+        if (contest !== null && !contest.allowRegistration) {
             res.status(400).json({
                 success: false,
                 message: 'Registration Not Started'
@@ -133,5 +133,13 @@ export const checkRegistration = async (
     req: Request,
     res: Response
 ): Promise<void> => {
-    res.json({ success: true, started: envVariables.ALLOW_USER_REGISTRATION })
+    const contest = await Contest.findOne({})
+    let started: boolean
+    if (contest == null) {
+        started = true
+    } else {
+        started = contest.allowRegistration
+    }
+
+    res.json({ success: true, started })
 }

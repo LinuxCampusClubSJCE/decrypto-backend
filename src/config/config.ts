@@ -11,8 +11,6 @@ interface EnvVariables {
     ADMIN_EMAIL: string
     ADMIN_FULLNAME: string
     ADMIN_USN: string
-    ALLOW_QUESTION_UPDATE: boolean
-    ALLOW_USER_REGISTRATION: boolean
     ADMIN_PHONE: string
 }
 
@@ -26,8 +24,6 @@ declare let process: {
         ADMIN_EMAIL: string
         ADMIN_FULLNAME: string
         ADMIN_USN: string
-        ALLOW_QUESTION_UPDATE: string
-        ALLOW_USER_REGISTRATION: string
         ADMIN_PHONE: string
     }
 }
@@ -57,8 +53,6 @@ const envVariables: EnvVariables = {
             : 'LCC Admin',
     ADMIN_USN:
         process.env.ADMIN_USN !== '' ? process.env.ADMIN_USN : '01JST00CS000',
-    ALLOW_QUESTION_UPDATE: process.env.ALLOW_QUESTION_UPDATE === 'true',
-    ALLOW_USER_REGISTRATION: process.env.ALLOW_USER_REGISTRATION === 'true',
     ADMIN_PHONE: process.env.ADMIN_PHONE
 }
 export default envVariables

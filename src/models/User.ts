@@ -4,6 +4,7 @@ import mongoose, { type Document, Schema } from 'mongoose'
 export interface IUser extends Document {
     fullName: string
     username: string
+    codeName?: string
     email: string
     usn: string
     phone: string
@@ -27,7 +28,13 @@ const userSchema: Schema = new Schema({
         lowercase: true,
         trim: true,
         minLength: [4, 'Username should be at least 4 characters'],
-        unique: true
+        unique: true,
+        message: ''
+    },
+    codeName: {
+        type: String,
+        trim: true,
+        minLength: [4, 'Username should be at least 4 characters']
     },
     email: {
         type: String,
