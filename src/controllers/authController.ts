@@ -50,6 +50,7 @@ export const registerTeam = async (
         const {
             fullName,
             username,
+            codeName,
             email,
             usn,
             phone,
@@ -61,6 +62,7 @@ export const registerTeam = async (
         const newUser: IUser = new User({
             fullName,
             username,
+            codeName,
             email,
             usn,
             phone,

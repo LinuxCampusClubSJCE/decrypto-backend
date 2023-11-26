@@ -34,7 +34,7 @@ const userSchema: Schema = new Schema({
     codeName: {
         type: String,
         trim: true,
-        minLength: [4, 'Username should be at least 4 characters']
+        minLength: [4, 'CodeName should be at least 4 characters']
     },
     email: {
         type: String,

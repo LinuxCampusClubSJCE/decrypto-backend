@@ -14,7 +14,7 @@ export const checkAns = async (
     next: NextFunction
 ): Promise<void> => {
     try {
-        const { answer, rate, ansCount } = req.body
+        const { answer, rate, avgAttempts } = req.body
         if (req.user == null || req.user.isAdmin || req.user.isTeam) return
         const questionNum = req.user.solvedQuestions
         const contest = await Contest.findOne({})
@@ -35,8 +35,9 @@ export const checkAns = async (
             })
             question.rateCount++
             question.rating = (rate + question.rating) / question.rateCount
-            question.ansCount =
-                (Number(ansCount) + question.ansCount) / question.rateCount
+            question.avgAttempts =
+                (Number(avgAttempts) + question.avgAttempts) /
+                question.rateCount
             await question.save()
         } else {
             res.status(201).json({
@@ -94,22 +95,19 @@ export const getMyQuestion = async (
             return
         }
         const questionId = contest?.questionOrder[questionNum]
-        const question = await Question.findById(questionId).select(
-            'image hint answer showedHint rating rateCount ansCount'
-        )
+        const question = await Question.findById(questionId)
+            .select('image hint answer showedHint rating rateCount avgAttempts')
+            .populate('creator', 'codeName')
+            .lean()
         if (question != null) {
             res.status(201).json({
                 success: true,
                 started: true,
                 completed: false,
                 question: {
+                    ...question,
                     no: questionNum + 1,
-                    image: question.image,
-                    showedHint: question.showedHint,
-                    rating: question.rating,
-                    rateCount: question.rateCount,
-                    answer: Md5.hashStr(modifyString(question.answer)),
-                    ansCount: question.ansCount
+                    answer: Md5.hashStr(modifyString(question.answer))
                 }
             })
         } else {
@@ -151,7 +149,7 @@ export const addQuestion = async (
     next: NextFunction
 ): Promise<void> => {
     try {
-        const { image, answer, hint, difficulty } = req.body
+        const { image, answer, hint, difficulty, category } = req.body
         if (req.user == null) return
         const newQuestion: IQuestion = new Question({
             image,
@@ -159,6 +157,7 @@ export const addQuestion = async (
             modifiedAnswer: modifyString(answer),
             hint,
             difficulty,
+            category,
             creator: req.user._id
         })
         await newQuestion.save()
@@ -210,6 +209,17 @@ export const updateQuestion = async (
                 message: 'Contest Started. Cannot Update. Ask Admin'
             })
             return
+        }
+        if (req.user !== undefined && !req.user.isAdmin) {
+            delete req.body.avgAttempts
+            delete req.body.rating
+            delete req.body.showedHint
+            delete req.body.avgAttempts
+            delete req.body.rateCount
+        }
+        req.body.updatedDate = moment.tz('Asia/Kolkata').toDate()
+        if (req.body.answer !== undefined) {
+            req.body.modifiedAnswer = modifyString(req.body.answer)
         }
         await Question.findByIdAndUpdate(req.params.id, req.body)
         res.status(200).json({

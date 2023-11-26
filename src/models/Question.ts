@@ -1,19 +1,31 @@
 import mongoose, { type Document, Schema } from 'mongoose'
 import moment from 'moment-timezone'
 
+enum QuestionCategory {
+    Technical = 'Technical',
+    Movie = 'Movie',
+    Music = 'Music',
+    Celebrity = 'Celebrity',
+    Sports = 'Sports',
+    Place = 'Place',
+    Brand = 'Brand',
+    Food = 'Food',
+    Other = 'Other'
+}
 export interface IQuestion extends Document {
     creator: mongoose.Types.ObjectId
-    image: string
     answer: string
     modifiedAnswer: string
     hint?: string
-    createdDate: Date
-    updatedDate: Date
     showedHint: string
     difficulty: number
     rating: number
     rateCount: number
-    ansCount: number
+    category: QuestionCategory
+    image: string
+    avgAttempts: number
+    createdDate: Date
+    updatedDate: Date
 }
 
 const questionSchema: Schema = new Schema({
@@ -22,7 +34,6 @@ const questionSchema: Schema = new Schema({
         ref: 'User',
         required: [true, 'Creator ID is required']
     },
-    image: { type: String, required: [true, 'Image URL is required'] },
     answer: {
         type: String,
         minLength: 3,
@@ -44,7 +55,13 @@ const questionSchema: Schema = new Schema({
     },
     rating: { type: Number, min: 0, max: 5, default: 0 },
     rateCount: { type: Number, default: 0 },
-    ansCount: { type: Number, default: 0 },
+    avgAttempts: { type: Number, default: 0 },
+    category: {
+        type: String,
+        enum: Object.values(QuestionCategory),
+        required: true
+    },
+    image: { type: String, required: [true, 'Image URL is required'] },
     createdDate: { type: Date, default: moment.tz('Asia/Kolkata').toDate() },
     updatedDate: { type: Date, default: moment.tz('Asia/Kolkata').toDate() }
 })

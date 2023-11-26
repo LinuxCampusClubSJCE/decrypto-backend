@@ -63,6 +63,8 @@ export const updateUser = async (
             delete updatedUserData.isTeam
             delete updatedUserData.isAdmin
             delete updatedUserData.username
+            delete updatedUserData.solvedQuestions
+            delete updatedUserData.codeName
         }
         if (updatedUserData.password !== undefined) {
             const hashedPassword = await bcrypt.hash(
@@ -80,7 +82,7 @@ export const updateUser = async (
             res.status(404).json({ success: false, message: 'User not found' })
             return
         }
-        res.json({ success: true, user: updatedUser })
+        res.json({ success: true, message: 'updated', user: updatedUser })
     } catch (error) {
         next(error)
     }
