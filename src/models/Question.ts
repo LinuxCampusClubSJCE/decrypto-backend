@@ -37,7 +37,7 @@ const questionSchema: Schema = new Schema({
     answer: {
         type: String,
         minLength: 3,
-        maxLegnth: 30,
+        maxLegnth: 40,
         required: [true, 'Answer is required']
     },
     modifiedAnswer: {

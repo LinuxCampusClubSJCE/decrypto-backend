@@ -28,6 +28,7 @@ const handleMongoErrors = (
             message: 'Duplicated Value'
         })
     } else {
+        console.log(req.body, err)
         // Other Mongoose errors
         res.status(500).json({
             success: false,
