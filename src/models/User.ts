@@ -43,7 +43,6 @@ const userSchema: Schema = new Schema({
     },
     usn: {
         type: String,
-        unique: true,
         required: [true, 'USN is required'],
         trim: true,
         uppercase: true,
