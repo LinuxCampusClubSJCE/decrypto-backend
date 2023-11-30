@@ -9,7 +9,8 @@ import {
     getMyQuestion,
     checkModifiy,
     checkAnswerExist,
-    getCount
+    getCount,
+    getCategoryCount
 } from '../controllers/questionController'
 import { checkAdmin, checkTeam } from '../middleware/authMiddleware'
 
@@ -19,6 +20,7 @@ router.post('/ans', checkAns) // Route to add a new question
 router.get('/my', getMyQuestion) // Route get solving question
 
 router.get('/count', checkAdmin, getCount) // Route to get all questions
+router.get('/categorycount', checkAdmin, getCategoryCount) // Route to get all questions
 router.get('/modifyallowed', checkTeam, checkModifiy) // Route check modification allowed or not
 router.post('/add', checkTeam, addQuestion) // Route to add a new question
 router.put('/:id', checkTeam, updateQuestion) // Route to update a question by ID

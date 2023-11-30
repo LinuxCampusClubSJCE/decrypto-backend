@@ -337,3 +337,24 @@ export const getCount = async (
         next(err)
     }
 }
+
+export const getCategoryCount = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
+    try {
+        console.log('running')
+        const categoryCounts = await Question.aggregate([
+            {
+                $group: {
+                    _id: '$category',
+                    count: { $sum: 1 }
+                }
+            }
+        ])
+        res.json({ success: true, categoryCounts })
+    } catch (err) {
+        next(err)
+    }
+}

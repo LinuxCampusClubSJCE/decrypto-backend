@@ -5,12 +5,12 @@ enum QuestionCategory {
     Other = 'Other',
     Technical = 'Technical',
     Movie = 'Movie',
-    Series = 'Web Series',
+    Series = 'TV/Web Series',
     Music = 'Music',
-    Celebrity = 'Celebrity',
+    Celebrity = 'Celebrity/Person',
     Sports = 'Sports',
     Place = 'Place',
-    Brand = 'Brand',
+    Brand = 'Brand/Company',
     Food = 'Food',
     Meme = 'Meme'
 }
