@@ -2,15 +2,17 @@ import mongoose, { type Document, Schema } from 'mongoose'
 import moment from 'moment-timezone'
 
 enum QuestionCategory {
+    Other = 'Other',
     Technical = 'Technical',
     Movie = 'Movie',
+    Series = 'Web Series',
     Music = 'Music',
     Celebrity = 'Celebrity',
     Sports = 'Sports',
     Place = 'Place',
     Brand = 'Brand',
     Food = 'Food',
-    Other = 'Other'
+    Meme = 'Meme'
 }
 export interface IQuestion extends Document {
     creator: mongoose.Types.ObjectId
