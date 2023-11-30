@@ -16,12 +16,17 @@ export const getDetails = async (
             return
         }
         if (contest.forceState === 'stop') {
-            res.json({ success: false, message: 'Contest is over' })
+            res.json({
+                success: false,
+                message: 'Contest is over',
+                ended: true
+            })
             return
         }
         if (contest.forceState === 'start') {
             res.json({
                 success: true,
+                started: true,
                 message: 'Contest started'
             })
             return

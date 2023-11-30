@@ -3,6 +3,7 @@ import Question, { type IQuestion } from '../models/Question'
 import Contest from '../models/Contest'
 import moment from 'moment-timezone'
 import { Md5 } from 'ts-md5'
+import User from '../models/User'
 const modifyString = (inputString: string): string => {
     const modifiedString = inputString.replace(/\s+/g, '').toLowerCase()
     return modifiedString
@@ -298,4 +299,41 @@ export const checkAnswerExist = async (
     const { answer } = req.params
     const question = await Question.findOne({ modifiedAnswer: answer })
     res.json({ success: true, exist: question !== null })
+}
+
+export const getCount = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
+    try {
+        console.log('running')
+        const usersWithQuestions = await User.aggregate([
+            {
+                $lookup: {
+                    from: 'questions',
+                    localField: '_id',
+                    foreignField: 'creator',
+                    as: 'questionsAdded'
+                }
+            },
+            {
+                $match: {
+                    questionsAdded: { $exists: true, $ne: [] } // Only select users who added questions
+                }
+            },
+            {
+                $project: {
+                    fullName: 1,
+                    questionCount: { $size: '$questionsAdded' } // Count of questions added by each user
+                }
+            },
+            {
+                $sort: { questionCount: -1 } // Sort users by the count of questions added
+            }
+        ])
+        res.json({ success: true, users: usersWithQuestions })
+    } catch (err) {
+        next(err)
+    }
 }
