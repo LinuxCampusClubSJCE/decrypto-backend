@@ -48,6 +48,10 @@ app.get('/', (req: Request, res: Response) => {
     res.json({ success: true, message: '✅ Server is Running' })
 })
 
+app.get('/api', (req: Request, res: Response) => {
+    res.json({ success: true, message: '✅ Server is Running' })
+})
+
 // Define routes
 app.use('/api/auth', authRoutes) // Authentication routes
 app.use('/api/users', userRoutes) // User routes

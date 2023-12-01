@@ -123,3 +123,20 @@ export const getLeaderboard = async (
         next(error)
     }
 }
+export const getTeamLeaderboard = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
+    try {
+        const leaderboard: IUser[] = await User.find(
+            { isTeam: true },
+            'fullName solvedQuestions'
+        )
+            .sort({ solvedQuestions: -1, lastSolvedTime: 1 })
+            .exec()
+        res.json({ success: true, leaderboard })
+    } catch (error) {
+        next(error)
+    }
+}

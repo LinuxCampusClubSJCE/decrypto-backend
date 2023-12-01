@@ -16,7 +16,7 @@ export const checkAns = async (
 ): Promise<void> => {
     try {
         const { answer, rate, avgAttempts } = req.body
-        if (req.user == null || req.user.isAdmin || req.user.isTeam) return
+        if (req.user == null) return
         const questionNum = req.user.solvedQuestions
         const contest = await Contest.findOne({})
         const questionId = contest?.questionOrder[questionNum]
@@ -34,12 +34,14 @@ export const checkAns = async (
                 success: true,
                 message: 'Your Answer is correct'
             })
-            question.rateCount++
-            question.rating = (rate + question.rating) / question.rateCount
-            question.avgAttempts =
-                (Number(avgAttempts) + question.avgAttempts) /
-                question.rateCount
-            await question.save()
+            if (!req.user.isTeam) {
+                question.rateCount++
+                question.rating = (rate + question.rating) / question.rateCount
+                question.avgAttempts =
+                    (Number(avgAttempts) + question.avgAttempts) /
+                    question.rateCount
+                await question.save()
+            }
         } else {
             res.status(201).json({
                 success: false,
@@ -57,7 +59,7 @@ export const getMyQuestion = async (
     next: NextFunction
 ): Promise<void> => {
     try {
-        if (req.user == null || req.user.isAdmin || req.user.isTeam) return
+        if (req.user == null) return
         const currentTime = moment().tz('Asia/Kolkata') // Get current time in IST
 
         const questionNum = req.user.solvedQuestions
