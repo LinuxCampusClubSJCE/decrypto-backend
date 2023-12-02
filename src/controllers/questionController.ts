@@ -143,11 +143,11 @@ export const getAllQuestions = async (
     next: NextFunction
 ): Promise<void> => {
     try {
+        const { showImage } = req.query
         if (req.user != null && req.user?.isAdmin) {
-            const questions = await Question.find().populate(
-                'creator',
-                'fullName username'
-            )
+            const questions = await Question.find()
+                .populate('creator', 'fullName username')
+                .select(showImage === 'false' ? '-image' : '')
             res.json({ success: true, questions })
         } else {
             const questions = await Question.find({ creator: req.user?._id })

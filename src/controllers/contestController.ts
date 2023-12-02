@@ -61,7 +61,10 @@ export const getContest = async (
     next: NextFunction
 ): Promise<void> => {
     try {
-        const contest = await Contest.findOne({})
+        const { showImage } = req.query
+        const contest = await Contest.findOne({}).select(
+            showImage === 'false' ? '-image' : ''
+        )
         if (contest == null) {
             res.json({ success: false, message: 'Contest not found' })
         } else {
