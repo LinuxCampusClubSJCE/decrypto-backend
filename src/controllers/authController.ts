@@ -90,7 +90,7 @@ export const loginUser = async (
         const { username, password } = req.body
         const user = await User.findOne({
             $or: [{ email: username }, { username }]
-        })
+        }).select('_id username email password fullName isTeam isAdmin')
         if (user == null) {
             res.status(400).json({
                 success: false,

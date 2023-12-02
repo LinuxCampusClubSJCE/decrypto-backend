@@ -29,6 +29,10 @@ export const checkAns = async (
         ) {
             req.user.solvedQuestions++
             req.user.lastSolvedTime = moment.tz('Asia/Kolkata').toDate()
+            if (req.user.attempts === undefined) {
+                req.user.attempts = []
+            }
+            req.user.attempts.push(Number(avgAttempts))
             await req.user?.save()
             res.status(201).json({
                 success: true,

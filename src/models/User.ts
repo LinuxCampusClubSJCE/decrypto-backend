@@ -9,6 +9,7 @@ export interface IUser extends Document {
     usn: string
     phone: string
     password: string
+    attempts: number[]
     isAdmin: boolean
     isTeam: boolean
     createdDate: Date
@@ -57,6 +58,7 @@ const userSchema: Schema = new Schema({
         minLength: [8, 'Password should be at least 8 characters'],
         maxLength: [64, 'Password should not exceed 64 characters']
     },
+    attempts: [{ type: Number, default: [] }],
     isAdmin: { type: Boolean, default: false },
     isTeam: { type: Boolean, default: false },
     createdDate: { type: Date, default: moment.tz('Asia/Kolkata').toDate() },
