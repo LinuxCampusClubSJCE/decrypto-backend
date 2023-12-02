@@ -7,7 +7,10 @@ export const getAllUsers = async (
     next: NextFunction
 ): Promise<void> => {
     try {
-        const users: IUser[] = await User.find() // Assuming User is the Mongoose model
+        const users: IUser[] = await User.find().populate(
+            'firstToCrack',
+            'answer'
+        ) // Assuming User is the Mongoose model
         res.json({ success: true, users })
     } catch (error) {
         next(error)
@@ -112,13 +115,48 @@ export const getLeaderboard = async (
     next: NextFunction
 ): Promise<void> => {
     try {
-        const leaderboard: IUser[] = await User.find(
-            { isAdmin: false, isTeam: false },
-            'username solvedQuestions'
-        )
-            .sort({ solvedQuestions: -1, lastSolvedTime: 1 })
-            .exec()
-        res.json({ success: true, leaderboard })
+        const users: IUser[] = await User.find({
+            isAdmin: false,
+            isTeam: false
+        })
+            .sort({ solvedQuestions: -1, lastSolvedTime: 1 }) // Sort by solvedQuestions descending, lastSolvedTime ascending
+            .select(
+                'fullName username solvedQuestions attempts firstToCrack lastSolvedTime'
+            )
+        const bigBrains = [...users]
+            .sort((a, b) => b.firstToCrack.length - a.firstToCrack.length)
+            .slice(0, 3)
+            .map((user) => ({
+                _id: user._id,
+                username: user.username,
+                solvedQuestions: user.solvedQuestions,
+                fullName: user.fullName,
+                totalCrack: user.firstToCrack.length
+            }))
+
+        const top15Solved = [...users].slice(0, 15)
+        const fastFingers = top15Solved
+            .sort((a, b) => {
+                const avgAttemptsA = a.attempts.reduce(
+                    (total, i) => total + i,
+                    0
+                )
+                const avgAttemptsB = b.attempts.reduce(
+                    (total, i) => total + i,
+                    0
+                )
+                return avgAttemptsB - avgAttemptsA
+            })
+            .slice(0, 3)
+            .map((user) => ({
+                _id: user._id,
+                username: user.username,
+                solvedQuestions: user.solvedQuestions,
+                fullName: user.fullName,
+                totalAttempts: user.attempts.reduce((total, i) => total + i, 0)
+            }))
+
+        res.send({ success: true, leaderboard: users, fastFingers, bigBrains })
     } catch (error) {
         next(error)
     }

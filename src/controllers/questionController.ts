@@ -123,7 +123,7 @@ export const getMyQuestion = async (
                 question: {
                     ...question,
                     no: questionNum + 1,
-                    answer: Md5.hashStr(modifyString(question.answer))
+                    answer: Md5.hashStr(modifyString(question.answer) + '0')
                 }
             })
         } else {
