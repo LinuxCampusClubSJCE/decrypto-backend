@@ -13,6 +13,7 @@ export interface IUser extends Document {
     isAdmin: boolean
     isTeam: boolean
     createdDate: Date
+    firstToCrack: mongoose.Schema.Types.ObjectId[]
     solvedQuestions: number
     lastSolvedTime: Date
 }
@@ -58,6 +59,7 @@ const userSchema: Schema = new Schema({
         minLength: [8, 'Password should be at least 8 characters'],
         maxLength: [64, 'Password should not exceed 64 characters']
     },
+    firstToCrack: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Question' }],
     attempts: [{ type: Number, default: [] }],
     isAdmin: { type: Boolean, default: false },
     isTeam: { type: Boolean, default: false },

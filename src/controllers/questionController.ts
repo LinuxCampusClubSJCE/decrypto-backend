@@ -32,6 +32,12 @@ export const checkAns = async (
             if (req.user.attempts === undefined) {
                 req.user.attempts = []
             }
+            if (question.rateCount === 0) {
+                if (req.user.firstToCrack === undefined) {
+                    req.user.firstToCrack = []
+                }
+                req.user.firstToCrack.push(question._id)
+            }
             req.user.attempts.push(Number(avgAttempts))
             await req.user?.save()
             res.status(201).json({
