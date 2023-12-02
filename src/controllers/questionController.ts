@@ -50,7 +50,8 @@ export const checkAns = async (
                     (rate + question.rating * (question.rateCount - 1)) /
                     question.rateCount
                 question.avgAttempts =
-                    (Number(avgAttempts) + question.avgAttempts) /
+                    (Number(avgAttempts) +
+                        question.avgAttempts * (question.rateCount - 1)) /
                     question.rateCount
                 await question.save()
             }
