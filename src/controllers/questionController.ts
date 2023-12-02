@@ -47,7 +47,7 @@ export const checkAns = async (
             if (!req.user.isTeam) {
                 question.rateCount++
                 question.rating =
-                    (rate + question.rating * question.rateCount) /
+                    (rate + question.rating * (question.rateCount - 1)) /
                     question.rateCount
                 question.avgAttempts =
                     (Number(avgAttempts) + question.avgAttempts) /
