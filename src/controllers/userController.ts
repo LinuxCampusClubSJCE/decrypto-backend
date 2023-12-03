@@ -1,6 +1,7 @@
 import { type NextFunction, type Request, type Response } from 'express'
 import User, { type IUser } from '../models/User' // Assuming IUser is the User model interface
 import bcrypt from 'bcrypt'
+import { Logger } from '../Logger'
 export const getAllUsers = async (
     req: Request,
     res: Response,
@@ -99,6 +100,7 @@ export const deleteUser = async (
     const userId = req.params.id
     try {
         const deletedUser = await User.findByIdAndDelete(userId)
+        void Logger(req, 'user delete ' + userId)
         if (deletedUser == null) {
             res.status(404).send({ success: false, meesage: 'User not found' })
             return

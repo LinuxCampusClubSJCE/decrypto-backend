@@ -4,6 +4,7 @@ import Contest from '../models/Contest'
 import moment from 'moment-timezone'
 import { Md5 } from 'ts-md5'
 import User from '../models/User'
+import { Logger } from '../Logger'
 const modifyString = (inputString: string): string => {
     const modifiedString = inputString.replace(/\s+/g, '').toLowerCase()
     return modifiedString
@@ -60,6 +61,7 @@ export const checkAns = async (
                 success: false,
                 message: 'Incorrect Answer'
             })
+            void Logger(req, 'incorrect answer')
         }
     } catch (error) {
         next(error)
@@ -108,6 +110,7 @@ export const getMyQuestion = async (
                 message: 'You have completed all the questions 🔥',
                 completed: true
             })
+            void Logger(req, 'completed')
             return
         }
         const questionId = contest?.questionOrder[questionNum]
@@ -131,6 +134,7 @@ export const getMyQuestion = async (
                 success: false,
                 message: 'Question not found'
             })
+            void Logger(req, 'question not found ' + questionId.toString())
         }
     } catch (error) {
         next(error)
@@ -226,6 +230,7 @@ export const updateQuestion = async (
             })
             return
         }
+        void Logger(req, 'question modified ' + req.params.id + ' ' + req.body)
         if (req.user !== undefined && !req.user.isAdmin) {
             delete req.body.avgAttempts
             delete req.body.rating

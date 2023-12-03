@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken'
 import User, { type IUser } from '../models/User'
 import envVariables from '../config/config'
 import Contest from '../models/Contest'
+import { Logger } from '../Logger'
 
 // Controller for user registration
 export const registerUser = async (
@@ -14,6 +15,7 @@ export const registerUser = async (
     try {
         const contest = await Contest.findOne({})
         if (contest !== null && !contest.allowRegistration) {
+            void Logger(req, 'contest not started')
             res.status(400).json({
                 success: false,
                 message: 'Registration Not Started'
@@ -96,17 +98,24 @@ export const loginUser = async (
                 success: false,
                 message: 'Invalid username/password'
             })
+            void Logger(
+                req,
+                'invalid login not found' + username + ' ' + password
+            )
             return
         }
         const validPassword = await bcrypt.compare(password, user.password)
         if (!validPassword) {
+            void Logger(
+                req,
+                'invalid login password incorrect' + username + ' ' + password
+            )
             res.status(400).json({
                 success: false,
                 message: 'Invalid username/password'
             })
             return
         }
-
         const accessToken = jwt.sign(
             { userId: user._id },
             envVariables.JWT_SECRET,
@@ -120,6 +129,9 @@ export const loginUser = async (
             accessToken,
             user
         })
+        if (user.isAdmin) {
+            void Logger(req, 'Login admin ' + user.username)
+        }
     } catch (error) {
         next(error)
     }

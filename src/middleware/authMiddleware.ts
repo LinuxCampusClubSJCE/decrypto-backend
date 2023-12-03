@@ -2,6 +2,7 @@ import { type Request, type Response, type NextFunction } from 'express'
 import jwt from 'jsonwebtoken'
 import envVariables from '../config/config'
 import User from '../models/User'
+import { Logger } from '../Logger'
 
 export const checkToken = (
     req: Request,
@@ -12,15 +13,18 @@ export const checkToken = (
     const token = authHeader?.split(' ')[1]
     if (token == null) {
         res.status(401).json({ success: false, message: 'Please Login' })
+        void Logger(req, 'token null')
         return
     }
 
     jwt.verify(token, envVariables.JWT_SECRET, async (err: any, data: any) => {
         if (err != null) {
+            console.log({ err })
             res.status(403).json({
                 success: false,
                 message: 'Please Login'
             })
+            void Logger(req, `jwt verify error ${err}`)
             return
         }
         const user = await User.findById(data.userId)
@@ -28,10 +32,12 @@ export const checkToken = (
             req.user = user
             next()
         } else {
+            console.log('user not found')
             res.status(403).json({
                 success: false,
                 message: 'Please Login'
             })
+            void Logger(req, 'user not found')
         }
     })
 }
@@ -44,6 +50,7 @@ export const checkAdmin = (
         next()
     } else {
         res.status(401).json({ success: false, message: 'You are not Admin' })
+        void Logger(req, 'not admin')
     }
 }
 export const checkTeam = (
@@ -58,5 +65,6 @@ export const checkTeam = (
             success: false,
             message: 'You are not member of LCC'
         })
+        void Logger(req, 'not lcc')
     }
 }
