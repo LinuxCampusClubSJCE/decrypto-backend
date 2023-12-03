@@ -13,13 +13,14 @@ import authRoutes from './routes/authRoutes' // Import your authentication route
 import { rateLimit } from 'express-rate-limit'
 import userRoutes from './routes/userRoutes' // Import your user routes
 import questionRoutes from './routes/questionRoutes' // Import your user routes
+import logRouters from './routes/logRoutes' // Import your user routes
 import messageRoutes from './routes/messageRoutes' // Import your message routes
 import { checkToken } from './middleware/authMiddleware'
 import createAdminUser from './seeder/admin'
 import contestRoutes from './routes/contestRoutes'
 import handleMongoErrors from './middleware/mongooseError'
 import mongoose from 'mongoose'
-
+import requestIp from 'request-ip'
 dotenv.config()
 
 const app: Express = express()
@@ -42,6 +43,7 @@ app.use(
         origin: '*'
     })
 )
+app.use(requestIp.mw())
 app.use(limiter)
 app.use(express.json())
 
@@ -58,7 +60,8 @@ app.use('/api/auth', authRoutes) // Authentication routes
 app.use('/api/users', userRoutes) // User routes
 app.use('/api/question', checkToken, questionRoutes) // Question routes
 app.use('/api/contest', contestRoutes) // Contest routes
-app.use('/api/message', messageRoutes) // Contest routes
+app.use('/api/message', messageRoutes) // message routes
+app.use('/api/logs', logRouters) // Log routes
 
 app.use('/api-docs', swaggerRoute)
 app.use((err: Error, req: Request, res: Response, next: NextFunction): void => {

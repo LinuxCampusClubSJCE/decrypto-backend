@@ -5,5 +5,6 @@ import { type IUser } from './models/User' // Assuming IUser is the User model i
 declare module 'express' {
     interface Request {
         user?: IUser // Add the user property to Request
+        clientIp?: string
     }
 }

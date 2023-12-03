@@ -9,6 +9,11 @@ export const checkToken = (
     res: Response,
     next: NextFunction
 ): void => {
+    console.log(
+        req.clientIp,
+        req.headers['x-forwarded-for'],
+        req.socket.remoteAddress
+    )
     const authHeader = req.headers.authorization
     const token = authHeader?.split(' ')[1]
     if (token == null) {
