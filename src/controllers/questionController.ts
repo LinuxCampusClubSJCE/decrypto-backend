@@ -2,7 +2,7 @@ import { type NextFunction, type Request, type Response } from 'express'
 import Question, { type IQuestion } from '../models/Question'
 import Contest from '../models/Contest'
 import moment from 'moment-timezone'
-import { Md5 } from 'ts-md5'
+import bcrypt from 'bcrypt'
 import User from '../models/User'
 import { Logger } from '../Logger'
 const modifyString = (inputString: string): string => {
@@ -115,10 +115,11 @@ export const getMyQuestion = async (
         }
         const questionId = contest?.questionOrder[questionNum]
         const question = await Question.findById(questionId)
-            .select('image hint answer showedHint rating rateCount avgAttempts')
+            .select('image answer showedHint rating rateCount avgAttempts')
             .populate('creator', 'codeName')
             .lean()
         if (question != null) {
+            const ansHash = await bcrypt.hash(question?.answer, 10)
             res.status(201).json({
                 success: true,
                 started: true,
@@ -126,7 +127,7 @@ export const getMyQuestion = async (
                 question: {
                     ...question,
                     no: questionNum + 1,
-                    answer: Md5.hashStr(modifyString(question.answer) + '0')
+                    answer: ansHash
                 }
             })
         } else {
@@ -345,6 +346,7 @@ export const getCount = async (
             {
                 $project: {
                     fullName: 1,
+                    codeName: 1,
                     questionCount: { $size: '$questionsAdded' } // Count of questions added by each user
                 }
             },
