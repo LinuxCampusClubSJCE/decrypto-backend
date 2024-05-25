@@ -115,7 +115,7 @@ export const getMyQuestion = async (
         }
         const questionId = contest?.questionOrder[questionNum]
         const question = await Question.findById(questionId)
-            .select('image answer showedHint rating rateCount avgAttempts')
+            .select('image answer showedHint rating rateCount avgAttempts modifiedAnswer')
             .populate('creator', 'codeName')
             .lean()
         if (question != null) {
