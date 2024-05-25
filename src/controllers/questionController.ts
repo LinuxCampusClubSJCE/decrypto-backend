@@ -119,7 +119,7 @@ export const getMyQuestion = async (
             .populate('creator', 'codeName')
             .lean()
         if (question != null) {
-            const ansHash = await bcrypt.hash(question?.answer, 10)
+            const ansHash = await bcrypt.hash(question?.modifiedAnswer, 10)
             res.status(201).json({
                 success: true,
                 started: true,
